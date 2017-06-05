@@ -1,0 +1,4 @@
+import matplotlib.pyplot as plt
+
+def SS(spikeTimes) :
+    var length = len(spikeTimes)

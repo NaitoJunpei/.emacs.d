@@ -1,0 +1,162 @@
+%\section{結論}
+まず、時系列クラスタリングを利用せずに、0歳から2歳までのデータを利用した、2歳以降での学習継続を予測した結果を示す。AUC値と、各特徴の重みを表{\ref{table5}}に示す。
+\begin{table}[t]
+  \begin{center}
+    \caption{クラスタリング無しのAUCと特徴の重み}\label{table5}
+    \begin{tabular}{|c|r|c|r|} \hline
+      \multicolumn{2}{|c|}{AUC値} & \multicolumn{2}{|c|}{0.7549} \\ \hline \hline
+      特徴名 & 重み & 特徴名 & 重み \\ \hline
+      子供No. & -0.0440 & 初回検査日齢 & -1.0622 \\ \hline
+      検査時の日齢 & 2.3269 & 検査間隔 & 0.2380 \\ \hline
+      検査回数 & 0.3985 & 得点平均 & 0.1282 \\ \hline
+      身体的発達の得点 & 0.0437 & 知覚的発達の得点 & -0.1585 \\ \hline
+      言語的発達の得点 & 0.3448 & 社会性の発達の得点 & 0.1993 \\ \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+これを見ると、重みの絶対値が大きい、すなわち、予測に大きい影響を与えているのは、検査時の日齢である。正の重みであるため、日齢が高い時点で多くの検査を受けているほど、学習を継続しやすいという傾向が分かる。また、次に重みの絶対値が大きいのは初回検査日齢だった。負の重みであるため、初めて検査を受けた時の日齢が低いほど学習を継続しやすいという傾向が分かる。
+
+続いて、クラスタリングを行った結果について見ていく。
+0歳から2歳のデータを利用した、2歳以降での学習継続の予測について、クラスタリングを行った場合と、行わなかった場合での予測精度の違いを表{\ref{table:予測精度}}に示す。
+\begin{table}[!t]
+  \begin{center}
+    \caption{0歳から2歳のデータを使った予測の精度}\label{table:予測精度}
+    \begin{tabular}{|c|c|} \hline
+      & AUC値 \\ \hline
+      クラスタリングなし & 0.7549 \\ \hline
+      クラスタリング最大値 & 0.8001 \\ \hline
+      クラスタリング平均値 & 0.7516 \\ \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+表{\ref{table:予測精度}}から、クラスタリング手法を適切に選ぶと、予測精度が向上していることが分かる。
+同様に、2歳から4歳までのデータを利用した4歳以降での学習継続の予測について、クラスタリングを行った場合と行わなかった場合での予測精度の違いをを表{\ref{table:予測精度2}}に示す。
+\begin{table}[!t]
+  \begin{center}
+    \caption{2歳から4歳のデータを使った予測の精度}\label{table:予測精度2}
+    \begin{tabular}{|c|c|} \hline
+      & AUC値 \\ \hline
+      クラスタリングなし & 0.8104 \\ \hline
+      クラスタリング最大値 & 0.8327 \\ \hline
+      クラスタリング平均値 & 0.7597 \\ \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+0歳から2歳までのデータを使った実験よりも、クラスタリングの影響が小さいという様子が見て取れる。
+
+クラスタの様子について詳細に見ていく。図{\ref{fig:前後ろ}}は、線形補間を行わずにDTW距離を計算し、群平均法で50のクラスタに分類するクラスタリングを行った結果できたクラスタのうち、ある2つのクラスタである。横軸が検査時の日齢、縦軸が知覚的発達の得点となっている。
+\begin{comment}図{\ref{fig:前後ろ}}中の左下から右上への直線と、真ん中ほどの横の直線は補助線である。
+\end{comment}
+なお、この時のAUC値は0.7701であった。
+\begin{figure}[t]
+  \begin{center}
+    \begin{tabular}{cc}
+      \begin{minipage}{0.5\hsize}
+        \begin{center}
+          \includegraphics[clip, width=4.0cm]{./figs/k_DTW_O_AVE_50_3_ALT.png}
+          \hspace{1.6cm} {\ref{fig:前後ろ}}-1: 検査時の日齢が小さいクラスタ。学習を継続しない子供が少なかった。
+        \end{center}
+      \end{minipage}
+      
+      \begin{minipage}{0.5\hsize}
+        \begin{center}
+          \includegraphics[clip, width=4.0cm]{./figs/k_DTW_O_AVE_50_13_ALT.png}
+          \hspace{1.6cm} {\ref{fig:前後ろ}}-2: 検査時の日齢が大きいクラスタ。学習を継続する子供が多かった。
+        \end{center}
+      \end{minipage}
+
+    \end{tabular}
+  \end{center}
+  \caption{検査時の日齢の傾向を示す例}\label{fig:前後ろ}
+\end{figure}
+図{\ref{fig:前後ろ}}-1は正例15、負例157を含む学習を継続した子供が少なかったクラスタであり、図{\ref{fig:前後ろ}}-2は正例19、負例5を含む学習を継続した子供が多かったクラスタである。検査時の日齢が小さいクラスタに学習を継続した子供が少なく、検査時の日齢が大きいクラスタに学習を継続した子供が多くなっていて、日齢が高い時点で検査を多く受けているほど継続しやすいという傾向がクラスタリングの結果にも現れていることが分かる。
+
+また、重みだけでは見えない傾向も、クラスタリングで見ることができた。
+\begin{figure}[t]
+  \begin{center}
+    \begin{tabular}{cc}
+
+      \begin{minipage}{0.5\hsize}
+        \begin{center}
+          \includegraphics[clip, width=4.0cm]{./figs/k_DTW_O_AVE_50_32_ALT.png}
+          \hspace{1.6cm} {\ref{fig:高い低い}}-1: 得点が小さいクラスタ。学習を継続する子供が少なかった。
+        \end{center}
+      \end{minipage}
+
+      \begin{minipage}{0.5\hsize}
+        \begin{center}
+          \includegraphics[clip, width=4.0cm]{./figs/k_DTW_O_AVE_50_44_ALT.png}
+          \hspace{1.6cm} {\ref{fig:高い低い}}-2: 得点が大きいクラスタ。学習を継続した子供が多かった。
+        \end{center}
+      \end{minipage}
+    \end{tabular}
+  \end{center}
+  \caption{平均点数の傾向を示す例}\label{fig:高い低い}
+\end{figure}
+\begin{comment}
+図{\ref{fig:前後ろ}}と同じく、図{\ref{fig:高い低い}}中の左下から右上の直線と、横の直線は補助線である。
+\end{comment}
+図{\ref{fig:高い低い}}-1は正例34、負例133を含む学習を継続した子供が少ないクラスタ、図{\ref{fig:高い低い}}-2は正例27、負例4を含む学習を継続した子供が多いクラスタである。図{\ref{fig:高い低い}}に見るように、学習を継続した子供が多いクラスタは得点が高くまで伸びている子供がいることが多く、学習を継続した子供が少ないクラスタは得点が低く止まっている子供がいることが多かった。実際に、学習を継続した子供が多いクラスタと、そうでないクラスタについて、それぞれの子供の平均得点と最大得点を平均したものを比較してみたところ、表{\ref{table:得点比較}}のようになった。
+\begin{table}[!t]
+  \begin{center}
+    \caption{継続した子供が多いクラスタと継続した子供が少ないクラスタにおける、知覚的発達の得点の比較}\label{table:得点比較}
+    \begin{tabular}{|c|c|c|} \hline
+      & 平均 & 最大値 \\ \hline
+      継続した子供が多いクラスタ & 20.98 & 26.46 \\ \hline
+      継続した子供が少ないクラスタ & 11.51 & 15.61 \\ \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+知覚的発達の得点を、線形補間を行わないDTW距離で、群平均法で50個のクラスタにクラスタリングしたものについてのみ示したが、他の科目の得点についても同様の傾向が見られ、クラスタリング方法を変えても、群平均法と完全連結法を使っているものに関しては程度の差はあるが同じ傾向が見られた。
+
+\section{おわりに}
+本研究では、未就学の子供に対して学習データ分析を行い、子供の学習継続の予測を行った。学習継続の予測に時系列クラスタリングを利用する場合としない場合で予測精度を比較する実験を行い、クラスタリングによって予測精度が上がっていることを観察した。加えて、クラスタの様子を見ることによって、学習を継続した子供の得点の傾向と、学習を継続しなかった子供の得点の傾向を見ることができた。
+
+\begin{comment}
+単連結法のクラスタについて見る。単連結法では、大きいクラスタが一つできると、他のデータはそのクラスタに分類されやすくなるため、非常に大きいクラスタが一つあり、残りのクラスタが非常に小さいといった形になりやすく、完全連結法や、群平均法のようなクラスタごとに特徴がある様子を見ることが難しい。
+線形補間Bを行い、正規化したユークリッド距離で、200個のクラスタにクラスタリングを行った結果から、一番大きいクラスタと、そのクラスタ以外のクラスタを全て合わせた図を図{\ref{fig:MIN}}に示す。
+\begin{figure}[!t]
+  \begin{center}
+    \begin{tabular}{cc}
+      \begin{minipage}{0.5\hsize}
+        \begin{center}
+          \includegraphics[clip, width=4.0cm]{./figs/k_EUCL_B_N_MIN_200_200.png}
+          \hspace{1.6cm} {\ref{fig:MIN}}-1 大きいクラスタ。学習を継続した子供が多かった。
+        \end{center}
+      \end{minipage}
+
+      \begin{minipage}{0.5\hsize}
+        \begin{center}
+          \includegraphics[clip, width=4.0cm]{./figs/k_EUCL_B_N_MIN_200_.png}
+          \hspace{1.6cm} {\ref{fig:MIN}}-2 大きいクラスタ以外のクラスタのデータをまとめてプロットした図。学習を継続した子供が少なかった。
+        \end{center}
+      \end{minipage}
+
+    \end{tabular}
+  \end{center}
+  \caption{単連結法を使ったクラスタリングの例}
+  \label{fig:MIN}
+\end{figure}
+図{\ref{fig:MIN}}-1のクラスタは正例が801件、負例が540件で、正例の方に偏りがあるクラスタとなっており、結果として予測に良い影響を与えている。しかし、使う距離や線形補間によっては、偏りがでない場合もあり、そういった場合は予測への影響が少ない。単連結法で予測精度を上げるためには、時系列データ間の距離を計算した段階でほぼ全ての正例・負例間の距離が大きくなっている必要があり、それがあらかじめ分かっている場合を除いて、単連結法のみを予測に利用しても効果は見込めない。
+\end{comment}
+
+\bibliographystyle{jsai}
+\bibliography{JSAI7_Reference}
+\begin{comment}
+\begin{thebibliography}{99}
+%\bibitem[Knuth 84]{texbook}
+% Knuth,~D.~E.: The \TeX{}book, Addison-Wesley (1984),
+%  (邦訳~: \TeX{}ブック, 斎藤 信男 監修, 鷺谷 好輝 訳,
+%  アスキー出版局 (1992)).
+\bibitem[Long 11]{Long}
+  Siemens, G. and Long, P.: Penetrating the FOG: Analytics in learning and education, \textit{EDUCAUSE Review} (2011)
+\bibitem[Tamhane 14]{Tamhane}
+  Tamhane, A., Ikbal, S., Sengupta B., Duggirala, M. and Appleton, J.:Predicting student risks thorugh longitudinal analysis, \textit{KDD '14} (2014)
+\bibitem[Aguiar 15]{Aguiar}
+  Aguiar, E., Lakkaraju, H., Bhanpuri, N., Miller, D. Yuhas, B. and Addison, K.L.: Who, when, and why: A machine learning approach to prioritizing students at risk of not graduating high school on time, \textit{LAK15} (2015)
+\bibitem[Lakkaraju 15]{Lakkaraju}
+  Lakkaraju, H., Aguiar, E., Shan, C., Miller, D., Bhanpuri, N., Ghani, R. and Addison, K. L.: A machine learning framework to identify students at risk of adverse academic outcomes, \textit{KDD '15} (2015)
+\bibitem[Vihavainen 13]{Vihavainen}
+  Vihavainen, A., Luukkainen, M., and Kurhila, J.: Using students' programming behavior to predict success in an introductory mathematics course, \textit{EDM 2013} (2013)
+\end{thebibliography}
+\end{comment}

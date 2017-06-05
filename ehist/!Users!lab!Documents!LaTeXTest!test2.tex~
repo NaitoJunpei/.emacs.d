@@ -1,0 +1,65 @@
+\documentclass[b5paper, twoside]{jarticle}
+\usepackage[dvipdfmx]{graphicx} %% dvipdfmxの部分はLaTeXの環境に依存する　TeXworks を使っていれば大丈夫、、、きっと
+\usepackage{ifthen}
+
+\pagestyle{headings}
+
+%% コマンドの定義 特に理由がなければ変更しない
+%% ここから
+\newcommand{\myinclude}[2]{
+  \ifthenelse{#1 < 1}
+  {
+    \setcounter{page}{#1}
+    \thispagestyle{empty}
+    \includegraphics[width=167mm, height=236mm]{#2}
+    \newpage
+    \setcounter{page}{#1}
+    \thispagestyle{empty}
+    \includegraphics[width=167mm, height=236mm]{#2}
+    \newpage
+  }
+  {
+    \setcounter{page}{#1}
+    \includegraphics[width=167mm, height=236mm]{#2}
+    \newpage
+    \setcounter{page}{#1}
+    \includegraphics[width=167mm, height=236mm]{#2}
+    \newpage
+  }
+}
+%% ここまで
+
+%% レイアウトの設定 特に理由がなければ変更しない
+%% ここから
+\setlength{\oddsidemargin}{10mm}
+\setlength{\evensidemargin}{5mm}
+\setlength{\voffset}{-1in}
+\setlength{\hoffset}{-1in}
+\setlength{\marginparwidth}{0mm}
+\setlength{\topmargin}{7mm}
+\setlength{\headsep}{2mm}
+\setlength{\headheight}{2mm}
+\setlength{\marginparsep}{0mm}
+\setlength{\footskip}{0mm}
+\setlength{\parindent}{0pt}
+\setlength{\textwidth}{167mm}
+%% ここまで
+
+\begin{document}
+%%\layout
+\center{\#\#\#どうしても消せなかったページ　印刷時は飛ばそう\#\#\#\\
+(誰かTeXnicianがいたら直してください)}
+\newpage
+
+%% ここから画像ファイルを入れよう
+%% \myinclude{##ページ番号##}{##画像ファイル名##} と入力しよう
+\myinclude{-1}{black.png}
+\myinclude{7}{black.png}
+\myinclude{-1}{black.png}
+\myinclude{0}{black.png}
+\myinclude{6}{006.png}
+\myinclude{249}{249.pdf}
+
+
+
+\end{document}

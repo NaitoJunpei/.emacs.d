@@ -1,0 +1,202 @@
+package SulabApplet1;
+//非ガウスフィルタ and スムージング time-dependent-poisson(kappa=1と固定)
+//それぞれの確率分布の形を小区間に分けて求めていく
+//tdp2と書いてあるけど、これが初作でtdp1はない
+public class NonGaussianFilter_tdp2_1{
+	static double[] T;
+	static double[] t;
+	static int N;
+	
+	public static int D = 1200;//時間における分割数*時間
+	public static double dt;
+	
+	static int d = 100;//区間分割数
+	
+	static double[][] FL;//フィルタ分布. FL[D][d]. 
+	static double[][] PL;//予測分布. PL[D][d]. 
+	static double[][] SL;//平滑化分布. SL[D][d]. 
+	static double[] QL;//lambdaのシステムノイズ分布. QL[2d].
+	static int[] B;//観測モデル
+	
+	static double dl;
+	static double lambda;
+	
+	static double I;//規格化のための定数
+	
+	public static void Initialize (double[] tt){
+		T = tt;
+		N = T.length;
+		D = 5 * N; //非ガウスフィルタにおける時刻数Dはinterspike intervalの数Nの5倍とする
+		
+		t = new double[N+1];
+		t[0] = 0;
+		for(int i=0;i<N;i++){
+			t[i+1] = t[i] + T[i];
+		}
+		dt = (t[N]*(N+1)/N) / D; //時間を分割した時の時間幅
+		
+		FL = new double[D][d];
+		PL = new double[D][d];
+		SL = new double[D][d];
+		QL = new double[2*d];
+		B = new int[D]; //スパイクがある場所
+		
+		for(int i=0;i<D;i++){
+			B[i] = 0;
+		}
+		for(int i=0;i<=N;i++){
+			B[(int)(t[i]/dt)] += 1;
+		}
+		
+		///初期値設定///
+		//lambdaの初期値のため、Tの平均をとる
+		double mu = N / (t[N]-t[0]);
+		dl = 3.0*mu/d;
+		//filtering
+		double IEL = mu;//データなしでの予測値(平均)
+		double IVL = (mu/3.0)*(mu/3.0);//データなしでの予測値(分散)
+		double[] EXPL = new double[d];
+		double[] EXPK = new double[d];
+		I = 0;
+		for(int l=0;l<d;l++){
+			lambda = dl * (l+0.5);
+			EXPL[l] = Math.exp(-(lambda-IEL)*(lambda-IEL)/(2*IVL));
+		}
+		for(int l=0;l<d;l++){
+			lambda = dl * (l+0.5);
+			FL[0][l] = ProbEvent(B[0]) * EXPL[l];
+			I += FL[0][l];
+		}
+		for(int l=0;l<d;l++){
+			FL[0][l] = FL[0][l]/(I*dl);
+		}
+	}
+	
+	public static double[] NonGaussianFilter_tdp (double beta) {
+		//準備
+		I = 0;
+		for(int l=0;l<d;l++){
+			lambda = dl * l;
+			QL[d+l] = Math.exp(-beta/dt*lambda*lambda);
+			I += 2 * QL[d+l];
+		}
+		I -= QL[d];
+		for(int l=0;l<d;l++){
+			QL[d+l] = QL[d+l] / (I*dl);
+			QL[d-l] = QL[d+l];
+		}
+		QL[0] = 0;
+		//prediction and filtering
+		for(int i=0;i<D-1;i++){
+			//prediction
+			I = 0;
+			
+			PL[i][0] = 0;	//変更点：発生率のゼロ以下部分の確率分布をゼロ地点の確率分布にプラスする
+			for(int l=0;l<d;l++){
+				for(int u=0;u<=(d-l);u++){
+					PL[i][0] += QL[u] * FL[i][l];
+				}
+			}
+			I += PL[i][0];
+			
+			for(int l=1;l<d;l++){
+				PL[i][l] = 0;
+				for(int u=0;u<d;u++){
+					PL[i][l] += QL[l-u+d] * FL[i][u];
+				}
+				I += PL[i][l];
+			}
+			for(int l=0;l<d;l++){
+				PL[i][l] = PL[i][l]/(I*dl);
+			}
+			//filtering_lambda
+			I = 0;
+			for(int l=0;l<d;l++){
+				lambda = dl * (l+0.5);
+				FL[i+1][l] = ProbEvent(B[i+1]) * PL[i][l];
+				I += FL[i+1][l];
+			}
+			for(int l=0;l<d;l++){
+				FL[i+1][l] = FL[i+1][l]/(I*dl);
+			}
+		}
+		//smoothing
+		for(int l=0;l<d;l++){
+			SL[D-1][l] = FL[D-1][l];
+		}
+		for(int i=D-2;i>=0;i--){
+			I = 0;
+			
+			SL[i][0] = 0;	//変更点：発生率のゼロ以下部分の確率分布をゼロ地点の確率分布にプラスする
+			for(int l=0;l<d;l++){
+				for(int u=0;u<=(d-l);u++){
+					SL[i][0] += QL[u] * SL[i+1][l] / PL[i][l];
+				}
+			}
+			SL[i][0] = FL[i][0] * SL[i][0];
+			I += SL[i][0];
+			
+			for(int l=1;l<d;l++){
+				SL[i][l] = 0;
+				for(int u=0;u<d;u++){
+					SL[i][l] += QL[l-u+d] * SL[i+1][u] / PL[i][u];
+				}
+				SL[i][l] = FL[i][l] * SL[i][l];
+				I += SL[i][l];
+			}
+			for(int l=0;l<d;l++){
+				SL[i][l] = SL[i][l] / (I*dl);
+			}
+		}
+		
+		double[] data = new double[D+1];//返値
+		//グラフ用のmeanデータ
+		for(int i=0;i<D;i++){
+			data[i] = 0;
+			for(int l=0;l<d;l++){
+				lambda = dl * (l+0.5);
+				data[i] += lambda * SL[i][l];
+			}
+			data[i] = data[i] * dl;	//平均値（ゼロ付近にいかない）
+		}
+/*		double max;
+		int argmax;
+		for(int i=0;i<D;i++){
+			max = SL[i][0];
+			argmax = 0;
+			for(int l=1;l<d;l++){
+				if(SL[i][l]>max){
+					max = SL[i][l];
+					argmax = l;
+				}
+			}
+			data[i] = dl * (argmax+0.5);	//最大値（相転移が起こる）
+		}*/
+		
+		//EMmethod用のデータ
+		data[D] = 0;
+		double lambda1;
+		double lambda2;
+		for(int i=0;i<D-1;i++){
+			for(int l=0;l<d;l++){
+				lambda1 = dl * (l+0.5);
+				for(int u=0;u<d;u++){
+					lambda2 = dl * (u+0.5);
+					data[D] += SL[i+1][l]*FL[i][u]*QL[l-u+d]/PL[i][l] * (lambda1 - lambda2)*(lambda1 - lambda2);
+				}
+			}
+		}
+		data[D] = data[D] * dl*dl /dt *2/(D-1);
+		return data;
+	}
+	
+	private static double ProbEvent(int B){
+		double probevent;
+		if(B==0){
+			probevent = 1 - lambda*dt;
+		}else{
+			probevent = Math.pow(lambda*dt,B);
+		}
+		return probevent;
+	}
+}

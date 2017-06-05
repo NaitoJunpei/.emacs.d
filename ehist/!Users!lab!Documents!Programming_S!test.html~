@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="uft-8">
+<html>
+  <head>
+    <title>SVG.js</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages' :['corechart']}); //scatter chart
+    </script>
+  </head>
+  <body>
+    <style>
+      .bar rect {
+      fill: lightsalmon;
+      }
+    </style>
+    
+    <div id="canvas1"></div>
+    <div id="drawing"></div>
+    
+    <script type="text/javascript" src="svg.js"></script>
+    <script type="text/javascript" src="test.js"></script>
+    <script type="text/javascript">
+      var draw = SVG('drawing');
+      var box1 = draw.rect(100, 100).attr("fill", "white").stroke({ color: '#000', opacity: 1, width: 1}).move(50, 40);
+    </script>
+    <input type="file" id="files" name="files[]" multiple />
+    <textarea name="txt" rows="10" cols="50"></textarea>
+
+    <script>
+      function handleFileSelect(evt) {
+        var file = evt.target.files;
+        var reader = new FileReader();
+        reader.readAsText(file[0]);
+        reader.onload = function(ev) {
+          document.txt.value = reader.result;
+        }
+      }
+      document.getElementById('files').addEventListener('change', handleFileSelect, false);
+    </script>
+    <div id="google"></div><br>
+    <div id="google2"></div><br>
+    
+  </body>
+</html>
+

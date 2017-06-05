@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <math.h>
+
+#define T 1000
+#define X 10
+
+int main(void) {
+  float u[T][X + 1];
+  int indexT;
+  int indexX;
+  float deltaT = 1.0 / T;
+  float deltaX = 1.0 / X;
+
+  FILE *fp;
+  char *fname = "output.csv";
+  
+  fp = fopen(fname, "w");
+
+  for(indexX = 0; indexX < X; indexX++) {
+    u[0][indexX] = (float)sin((double)(deltaX * indexX) * M_PI);
+    fprintf(stdout, "%f\n", (float)sin((double)(deltaX * indexX) * M_PI));
+  }
+
+  for(indexT = 0; indexT < T; indexT++) {
+    u[indexT][0] = 0;
+    u[indexT][X] = 0;
+  }
+
+  for(indexT = 0; indexT < T; indexT++) {
+    fprintf(fp, "%f,", u[indexT][0]);
+  }
+  fprintf(fp, "\n");
+  
+  for(indexX = 1; indexX < X; indexX++) {
+    fprintf(fp, "%f,", u[0][indexX]);
+    for(indexT = 0; indexT < T - 1; indexT++) {
+      u[indexT + 1][indexX] =
+	(u[indexT][indexX] + deltaT * (u[indexT][indexX + 1] - 2 * u[indexT][indexX] + u[indexT][indexX - 1]))
+	/ (deltaX * deltaX);
+
+      fprintf(fp, "%f,", u[indexT + 1][indexX]);
+    }
+    fprintf(fp, "\n");
+  }
+
+  for(indexT = 0; indexT < T; indexT++) {
+    fprintf(fp, "%f,", u[indexT][X]);
+  }
+  fprintf(fp, "\n");
+
+  fclose(fp);
+
+  return 0;
+}
+  

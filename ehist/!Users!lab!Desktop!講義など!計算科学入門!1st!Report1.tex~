@@ -1,0 +1,15 @@
+\documentclass[a4paper]{jarticle}
+
+\begin{document}
+(i)
+\begin{eqnarray*}
+  A_{n+1} &=& a_{n+1}b_{n+1}c_{n+1}\\
+  &=& \frac{a_n + b_n + c_n}{3} \cdot \frac{a_nb_n + b_nc_n + c_na_n}{a_n + b_n + c_n} \cdot \frac{3a_nb_nc_n}{a_nb_n + b_nc_n + c_na_n}\\
+  &=& a_nb_nc_n\\
+  \cdots \\
+  &=& a_0b_0c_0
+\end{eqnarray*}
+
+$A_n$は$n$に依存しない
+
+(ii)

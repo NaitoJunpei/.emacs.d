@@ -1,0 +1,5 @@
+¥documentclass{jarticle}
+
+¥begin{document}
+test
+¥end{document}
