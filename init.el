@@ -31,7 +31,13 @@
 
 ;; package.elの設定
 (when (require 'package nil t)
+  (add-to-list 'package-archives '("ELPA" . "http://tromey.com/elpa/"))
   (package-initialize))
+
+(setq package-archives
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+	("melpa" . "http://melpa.org/packages/")
+	("org" . "http://orgmode.org/elpa/")))
 
 ;; emacsclientを使えるようにする
 ;;(server-start)
@@ -92,13 +98,50 @@
 (set-face-background 'show-paren-match-face "lightgreen")
 (set-face-underline-p 'show-paren-match-face "blue")
 
-;; anything Emacs実践入門P125
-;;(when (require 'anything nil t)
-;;  (setq
-   ;; 候補を表示するまでの時間。
-   
+;;anything Emacs実践入門P125
+(when (require 'anything nil t)
+  (setq
+   ;; 候補を表示するまでの時間
+   anything-idle-delay 0.3
+   ;; タイプして再描画するまでの時間
+   anything-input-idle-delay 0.2
+   ;; 候補の最大表示数
+   anything-candidate-number-limit 100
+   ;; 候補が多い時に体感速度を早くする
+   anything-quick-update t
+   ;; 候補選択ショートカットをアルファベットに
+   anything-enable-shortcuts 'alphabet)
 
+  (when (require 'anything-config nil t)
+    ;; root権限でアクションを実行するときのコマンド
+    (setq anything-su-or-sudo "sudo"))
 
+  (require 'anything-match-plugin nil t)
+
+  (when (and (executable-find "cmigemo")
+  	     (require 'migemo nil t))
+    (require 'anything-migemo nil t))
+
+  (when (require 'anything-complete nil t)
+    ;; lispシンボルの補完候補の再検索時間
+    (anything-lisp-complete-symbol-set-timer 150))
+
+  (require 'anything-show-completion nil t)
+
+  (when (require 'auto-install nil t)
+    (require 'anything-auto-install nil t))
+
+  (when (require 'descbinds-anything nil t)
+    ;; describe-bindings をAnythingに置き換える
+    (descbinds-anything-install))
+  )					
+
+;; auto-completeの設定
+(when (require 'auto-complete-config nil t)
+  (add-to-list 'ac-dictionary-directories
+	       "~/.emacs.d/elisp/ac-dict")
+  (define-key ac-mode-map (kbd "M-TAB") 'auto-complete)
+  (ac-config-default))
 
 
 (custom-set-variables
@@ -106,7 +149,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote (adwaita))))
+ '(custom-enabled-themes (quote (adwaita)))
+ '(package-selected-packages (quote (anything auto-complete package-utils popup))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
