@@ -1,8 +1,0 @@
-\documentclass[a4paper]{jarticle}
-\usepackage[dvipdfmx]{graphicx}
-
-\begin{document}
-(1)\\
-\includegraphics{results/CRR.png}
-
-\end{document}

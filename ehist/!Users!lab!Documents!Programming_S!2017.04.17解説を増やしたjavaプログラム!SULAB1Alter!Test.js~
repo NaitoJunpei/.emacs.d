@@ -1,4 +1,0 @@
-function f(x) {
-    temp = document.getElementById("test");
-    temp.innerHTML = x;
-}

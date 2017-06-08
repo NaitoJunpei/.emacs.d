@@ -1,9 +1,0 @@
-\documentclass[a4paper]{jarticle}
-
-\begin{document}
-Junpei Naito:6930-29-4327\\
-
-\begin{eqnarray*}
-  \beta &=& \argmin_{\beta_0, \beta_1, \cdots, \beta_p} \sum_{i=1}^n (y_i - \sum_{j=0}^p \beta_p x_{i,j})
-\end{eqnarray*}
-where $x_{i,0} = 1$
