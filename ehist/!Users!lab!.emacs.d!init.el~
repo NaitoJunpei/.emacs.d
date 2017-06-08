@@ -134,7 +134,11 @@
   (when (require 'descbinds-anything nil t)
     ;; describe-bindings をAnythingに置き換える
     (descbinds-anything-install))
-  )					
+  )
+
+;; anything-show-killing-ring
+(define-key global-map (kbd "M-y") 'anything-show-kill-ring)
+(define-key global-map (kbd "C-c f") 'anything-for-files)
 
 ;; auto-completeの設定
 (when (require 'auto-complete-config nil t)
@@ -143,13 +147,34 @@
   (define-key ac-mode-map (kbd "M-TAB") 'auto-complete)
   (ac-config-default))
 
+;; ElScreenの設定
+(when (require 'elscreen nil t)
+  ;; C-z C-zをタイプした場合にデフォルトのC-zを利用する
+  (if window-system
+      (define-key elscreen-map (kbd "C-z") 'iconify-or-deiconify-frame)
+    (define-key elscreen-map (kbd "C-z") 'suspend-emacs)))
+;; header-lineの先頭に<->を表示しない
+(setq elscreen-tab-display-control nil)
+(elscreen-start)
+
+;; flymake-python-pyflakesの設定
+(when (require 'flymake-python-pyflakes nil t)
+  (setq flymake-python-pyflakes-executable "pychecker"))
+(add-hook 'python-mode-hook 'flymake-python-pyflakes-load)
+
+;; Eggの設定
+(when (executable-find "git")
+  (require 'egg nil t))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote (adwaita))))
+ '(custom-enabled-themes (quote (adwaita)))
+ '(package-selected-packages
+   (quote
+    (flymake-easy flymake-python-pyflakes apel elscreen anything auto-complete package-utils popup))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
